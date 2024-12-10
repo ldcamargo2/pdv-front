@@ -1,0 +1,39 @@
+name: Build and Deploy Vue.js App
+
+on: push
+
+jobs:
+  build:
+    name: Build Vue.js App
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Create env.js file
+        run: |
+          mkdir -p src/config
+          echo "let env = {};" > src/config/env.js
+          echo "env.baseURL = 'https://api.estoqueflex.facero.com.br/api/v1/';" >> src/config/env.js
+          echo "env.normalURL = 'https://api.estoqueflex.facero.com.br/';" >> src/config/env.js
+          echo "export default env;" >> src/config/env.js
+
+      - name: Build the project
+        run: npm run build
+
+      - name: Deploy to FTP
+        uses: locaweb/ftp-deploy@1.0.0
+        with:
+          host: ${{ secrets.HOST }} 
+          user: ${{ secrets.USER }}
+          password: ${{ secrets.PASS }}
+          localDir: dist
+          remoteDir: /public_html/estoqueflex/front/dist

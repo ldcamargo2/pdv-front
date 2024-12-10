@@ -1,0 +1,7 @@
+@import '~@core/scss/base/pages/page-auth.scss';
+
+html[dir='rtl'] {
+  svg.feather {
+    transform: rotate(180deg);
+  }
+}
