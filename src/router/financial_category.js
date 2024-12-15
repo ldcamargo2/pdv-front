@@ -1,50 +1,50 @@
-import Crud from '../views/Dimension/Crud'
-import Entity from '../views/Dimension/Entity'
+import Crud from '../views/FinancialCategory/Crud'
+import Entity from '../views/FinancialCategory/Add'
 
 let routes = {
-    path: '/dimensions',
+    path: '/financial_categories',
     component: resolve => require(['../layouts/full/LayoutFull'], resolve),
     children: [
         {
-            path: '/dimensions/add',
-            name: 'NewDimension',
+            path: '/financial_categories/add',
+            name: 'NewFinancialCategory',
             component: Entity,
             meta: {
-                pageTitle: 'Adicionar Dimensão',
+                pageTitle: 'Adicionar Categoria',
                 access_nivel: ['1', '2'],
                 breadcrumb: [
                     {
-                        text: 'Adicionar Dimensão',
+                        text: 'Adicionar Categoria',
                         active: true,
                     },
                 ],
             },
         },
         {
-            path: '/dimensions/edit/:id?',
-            name: 'EditDimension',
+            path: '/financial_categories/edit/:id?',
+            name: 'EditFinancialCategory',
             component: Entity,
             meta: {
-                pageTitle: 'Editar Dimensão',
+                pageTitle: 'Editar Categoria',
                 access_nivel: ['1', '2'],
                 breadcrumb: [
                     {
-                        text: 'Editar Dimensão',
+                        text: 'Editar Categoria',
                         active: true,
                     },
                 ],
             },
         },
         {
-            path: '/dimensions',
-            name: 'list-dimensions',
+            path: '/financial_categories',
+            name: 'list-categories',
             component: Crud,
             meta: {
-                pageTitle: 'Lista de Dimensões',
+                pageTitle: 'Lista de Categorias',
                 access_nivel: ['1', '2'],
                 breadcrumb: [
                     {
-                        text: 'Dimensãos',
+                        text: 'Categorias',
                         active: true,
                     },
                 ],

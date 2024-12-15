@@ -7,7 +7,7 @@ let routes = {
   children: [
     {
       path: "/unity_measures/add",
-      name: "NewType",
+      name: "NewUnitMeasure",
       component: Entity,
       meta: {
         pageTitle: "Adicionar Unidade de Medida",
@@ -22,7 +22,7 @@ let routes = {
     },
     {
       path: "/unity_measures/edit/:id?",
-      name: "EditType",
+      name: "EditUnitMeasure",
       component: Entity,
       meta: {
         pageTitle: "Editar Unidade de Medida",

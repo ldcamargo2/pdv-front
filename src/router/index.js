@@ -11,6 +11,9 @@ import UnityMeasure from "./unity_measures";
 import Dimension from "./dimensions";
 import Supplier from "./suppliers";
 import PDV from "./pdv";
+import BillsToPay from './bills_to_pay'
+import BillsToReceive from './bills_to_receive'
+import FinancialCategory from './financial_category'
 
 Vue.use(VueRouter);
 
@@ -21,6 +24,9 @@ const router = new VueRouter({
     return { x: 0, y: 0 };
   },
   routes: [
+    BillsToPay,
+    BillsToReceive,
+    FinancialCategory,
     User,
     Profile,
     Product,

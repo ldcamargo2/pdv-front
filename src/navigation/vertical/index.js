@@ -31,7 +31,7 @@ export default [
         access_nivel: [1],
       },
       {
-        title: 'Tipos',
+        title: 'Tipos de Produtos',
         route: 'list-types',
         access_nivel: [1],
       },
@@ -45,8 +45,25 @@ export default [
         route: 'list-dimensions',
         access_nivel: [1],
       },
+      {
+        title: 'Categorias Financeiras',
+        route: 'list-categories',
+        access_nivel: [1],
+      },
     ],
   },  
+  {
+    title: 'Contas a Pagar',
+    route: 'BillsToPay',
+    icon: 'PlusCircleIcon',
+    access_nivel: [1, 2],
+  },
+  {
+    title: 'Contas a Receber',
+    route: 'BillsToReceive',
+    icon: 'MinusCircleIcon',
+    access_nivel: [1, 2],
+  },
   {
     title: 'Movimentar Estoque',
     route: 'manual_stock',

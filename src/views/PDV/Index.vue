@@ -197,7 +197,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="save(2)">Não Enviar NF (ESC)</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="save(2)">Não Enviar NF (F7)</button>
                 <button type="button" class="btn btn-primary" @click="save(1)">Enviar NF (F6)</button>
             </div>
             </div>
@@ -245,6 +245,32 @@ export default {
   },
   computed: {},
   methods: {
+    resetCashier(){
+        const self = this;
+        
+        self.setPayment = {
+            value: 0,
+            method: 0
+        }
+
+        self.product = {
+            output_value: 0,
+        }
+
+        self.sale = {
+            itens: [],
+            payments: [],
+            total: 0,
+            total_to_pay: 0,
+            total_paid: 0
+        },
+ 
+        self.temp = {
+            quantity: 1
+        }
+
+        self.inputFocus();
+    },
     handleKey(event) {
       if (event.key === "ArrowDown") {
         this.selectedIndex = (this.selectedIndex + 1) % this.items.length;
@@ -285,7 +311,11 @@ export default {
         const self = this;
         let api = self.$store.state.api + "sale/save";
 
+        self.$loading(true);
+
         self.sale.send_nf = id; 
+        
+        $('#modalSaveSale').modal('hide');
 
         axios
             .post(api, self.sale)
@@ -295,8 +325,12 @@ export default {
                     `Venda finalizada`,
                     "success"
                 );
+                self.$loading(false);
+
+                self.resetCashier();
             })
             .catch((error) => {
+                self.$loading(false);
                 self.$message(null, error.response.data, "error");
             });
     },
@@ -317,9 +351,24 @@ export default {
     },
     savePayment(){
         const self = this;
+        
         $('#modalPayment').modal('hide');
 
-        console.log('inserindo pagamento');
+        if(self.setPayment.method == 0){               
+            swal("Ops!", 'Selecione a forma de pagamento', "error")
+            .then(() => {
+                setTimeout(() => {
+                    $('#modalPayment').modal('show');
+
+                    setTimeout(() => {
+                        const input2 = document.getElementById('inputMoney');
+                        input2.focus();
+                        input2.select();
+                    }, 500);
+                }, 300); 
+            });
+            return;
+        }
 
         var obj = {
             method: self.setPayment.method,
@@ -338,6 +387,8 @@ export default {
 
         if(self.sale.total_to_pay == 0){
             $('#modalSaveSale').modal('show');
+
+            self.finishing = 1;
 
             setTimeout(() => {
                 const input = document.getElementById('inputCPF');
@@ -455,6 +506,9 @@ export default {
                     break;
                 case 'F5':                    
                     window.location.reload();
+                    break;
+                case 'F7':                    
+                    self.save(2);
                     break;
             
                 default:
