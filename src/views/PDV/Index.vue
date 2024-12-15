@@ -6,7 +6,7 @@
                 <div class="card-body mh">
                     <div class="row">
                         <div class="col-md-10">
-                            <input type="text" style="min-height: 65px; font-size: 25px; text-align: center" id="inputProduct" @keyup.enter="getProduct"  v-model="temp.product" placeholder="Código ou descrição do produto" class="form-control">
+                            <input type="text" style="min-height: 65px; font-size: 25px; text-align: center" id="inputProduct" @keyup.enter="getProduct"  v-model="temp.product" placeholder="Código ou descrição do produto" class="form-control" autocomplete="new-password">
                         </div>
                         <div class="col-md-2">
                             <input type="text" style="min-height: 65px; font-size: 25px; text-align: center" id="inputQtd" @keyup.enter="setQuantity"  v-model="temp.quantity" class="form-control">
@@ -39,13 +39,13 @@
                     </div>
                     <div class="row p-1 justify-content-center">
                         <div class="col-md-3">
-                            <button class="btn btn-pdv finalizar">Finalizar Venda (F4)</button>
+                            <button class="btn btn-pdv finalizar" @click="simularTecla('F4')">Finalizar Venda (F4)</button>
                         </div>
                         <div class="col-md-3">
-                            <button class="btn btn-pdv cancelar">Cancelar Venda (F5)</button>
+                            <button class="btn btn-pdv cancelar" @click="simularTecla('F5')">Cancelar Venda (F5)</button>
                         </div>
                         <div class="col-md-3">
-                            <button class="btn btn-pdv cancelar-item">Cancelar Item (F3)</button>
+                            <button class="btn btn-pdv cancelar-item" @click="simularTecla('F3')">Cancelar Item (F3)</button>
                         </div>
                     </div>
                 </div>
@@ -93,8 +93,36 @@
                 </div>
             </div>    
         </div>    
-    </div>    
-    <!-- Modal -->
+    </div>   
+    <!-- Modal de Itens -->
+    <div class="modal fade" id="modalItens" tabindex="-1" role="dialog" aria-labelledby="modalItensTitle" aria-hidden="true" @keydown="handleKey" >
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalItensLongTitle">Escolha uma opção</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">    
+                    <ul>
+                        <li 
+                            v-for="(item, index) in items" 
+                            :key="index"
+                            :class="{ selected: index === selectedIndex }"
+                            @click="selectItem(index)"
+                        >
+                            {{ item.description }}
+                        </li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div> 
+    </div>
+    <!-- Modal de Pagamento -->
     <div class="modal fade" id="modalPayment" tabindex="-1" role="dialog" aria-labelledby="modalPaymentTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
@@ -183,6 +211,9 @@ import vSelect from "vue-select";
 export default {
   data() {
     return {
+        items: [],
+        selectedIndex: 0, // Índice da opção selecionada
+        showModalItens: false,
         cancelItem: null,
         finishing: 0,
         money: {
@@ -214,6 +245,42 @@ export default {
   },
   computed: {},
   methods: {
+    handleKey(event) {
+      if (event.key === "ArrowDown") {
+        this.selectedIndex = (this.selectedIndex + 1) % this.items.length;
+      } else if (event.key === "ArrowUp") {
+        this.selectedIndex =
+          (this.selectedIndex - 1 + this.items.length) % this.items.length;
+      } else if (event.key === "Enter") {
+        this.selectItem(this.selectedIndex);
+      }
+    },
+    selectItem(index) {
+        const self = this;
+        self.product = self.items[index];
+
+        var obj = {
+                quantity: self.temp.quantity,
+                product: self.product,
+                unit_value: Number(self.product.output_value),
+                total: self.temp.quantity * Number(self.product.output_value)
+            };
+
+        self.sale.itens.push(obj);
+
+        //Soma o total da compra
+        self.sale.total = self.sale.total + obj.total;
+        self.sale.total_to_pay = self.sale.total_to_pay + obj.total;
+
+        self.temp =  { quantity: 1 }
+
+        setTimeout(() => {
+            self.inputFocus();
+            self.scrollToBottom();
+        }, 200);
+        
+        $('#modalItens').modal('hide');
+    },
     save(id){
         const self = this;
         let api = self.$store.state.api + "sale/save";
@@ -296,7 +363,29 @@ export default {
       axios
         .post(api, self.temp)
         .then((response) => {
+
+            if(Array.isArray(response.data)){
+                self.items = response.data;
+
+                setTimeout(() => {
+                    $('#modalItens').modal('show')
+                }, 300);
+                return;
+            }
+            
             self.product = response.data;
+
+            if(!self.product){
+                self.temp =  { quantity: 1 }
+                swal("Ops!", 'Produto não cadastrado.', "error")
+                .then(() => {
+                    setTimeout(() => {
+                        self.inputFocus();
+                    }, 300); 
+                });
+
+                return;
+            }
 
             var obj = {
                 quantity: self.temp.quantity,
@@ -364,6 +453,9 @@ export default {
                     }, 500);
 
                     break;
+                case 'F5':                    
+                    window.location.reload();
+                    break;
             
                 default:
                     break;
@@ -391,6 +483,19 @@ export default {
             const scrollDiv = document.getElementById("scrollDiv");
             scrollDiv.scrollTop = scrollDiv.scrollHeight;
         }, 200);
+    },
+    simularTecla(tecla, tipoEvento = 'keydown') {
+        const eventoTeclado = new KeyboardEvent(tipoEvento, {
+            key: tecla, // Nome da tecla
+            code: `Key${tecla.toUpperCase()}`, // Código da tecla
+            keyCode: tecla.charCodeAt(0), // Código numérico da tecla
+            charCode: tecla.charCodeAt(0),
+            which: tecla.charCodeAt(0),
+            bubbles: true // Permite que o evento se propague
+        });
+
+        // Dispara o evento no elemento desejado
+        document.dispatchEvent(eventoTeclado);
     }
   },
   mounted: function () {
@@ -473,5 +578,25 @@ export default {
 .btn-payment.active{
     background-color: #5347ff;
     color: white;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+li {
+  padding: 10px;
+  cursor: pointer;
+}
+
+li.selected {
+  background: #007bff;
+  color: #fff;
+}
+
+button {
+  margin-top: 10px;
 }
 </style>
