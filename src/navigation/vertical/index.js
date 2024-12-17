@@ -71,6 +71,12 @@ export default [
     access_nivel: [1, 2],
   },
   {
+    title: 'Inventário',
+    route: 'stock',
+    icon: 'TerminalIcon',
+    access_nivel: [1, 2],
+  },
+  {
     title: 'PDV',
     route: 'PDV',
     icon: 'TagIcon',

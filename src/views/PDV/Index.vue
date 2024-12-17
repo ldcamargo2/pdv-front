@@ -1,99 +1,142 @@
 <template>
   <div>
-    <div class="row">
-        <div class="col-md-7">
-            <div class="card">
-                <div class="card-body mh">
-                    <div class="row">
-                        <div class="col-md-10">
-                            <input type="text" style="min-height: 65px; font-size: 25px; text-align: center" id="inputProduct" @keyup.enter="getProduct"  v-model="temp.product" placeholder="Código ou descrição do produto" class="form-control" autocomplete="new-password">
+    <section v-if="opened">
+        <div class="row">
+            <div class="col-md-7">
+                <div class="card">
+                    <div class="card-body mh">
+                        <div class="row">
+                            <div class="col-md-10">
+                                <input type="text" style="min-height: 65px; font-size: 25px; text-align: center" id="inputProduct" @keyup.enter="getProduct"  v-model="temp.product" placeholder="Código ou descrição do produto" class="form-control" autocomplete="new-password">
+                            </div>
+                            <div class="col-md-2">
+                                <input type="text" style="min-height: 65px; font-size: 25px; text-align: center" id="inputQtd" @keyup.enter="setQuantity"  v-model="temp.quantity" class="form-control">
+                            </div>
                         </div>
-                        <div class="col-md-2">
-                            <input type="text" style="min-height: 65px; font-size: 25px; text-align: center" id="inputQtd" @keyup.enter="setQuantity"  v-model="temp.quantity" class="form-control">
+                        <div class="row bold mt-5 mb-5" style="height: 15vh">
+                            <div class="col-md-12" v-if="product.description">
+                                Último produto:
+                            </div>
+                            <div class="col-md-9" style="font-size: 30px; font-style: italic" v-if="product.description">
+                                {{ product.description }}
+                            </div>
+                            <div class="col-md-3" style="text-align:right; font-size: 30px; font-style: italic" v-if="product.description">
+                                R${{ formatMoney(Number(product.output_value)) }}
+                            </div>
+                        </div>
+                        <div class="row p-1 justify-content-center">
+                            <div class="col-md-3 mr-1 box-total">
+                                <span style="font-size: 20px">Total</span><br>
+                                <span class="bold font_blue">{{ formatMoney(sale.total) }}</span>
+                            </div>
+                            <div class="col-md-3 mr-1 box-total">
+                                <span style="font-size: 20px">Total à Pagar (-)</span><br>
+                                <span class="bold font_red">{{ formatMoney(sale.total_to_pay) }}</span>
+                            </div>
+                            <div class="col-md-3 mr-1 box-total">
+                                <span style="font-size: 20px">Total Pago (+)</span><br>
+                                <span class="bold font_green">{{ formatMoney(sale.total_paid) }}</span>
+                            </div>
+                        </div>
+                        <div class="row p-1 justify-content-center">
+                            <div class="col-md-3">
+                                <button class="btn btn-pdv finalizar" @click="simularTecla('F4')">Finalizar Venda (F4)</button>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-pdv cancelar" @click="simularTecla('F5')">Cancelar Venda (F5)</button>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-pdv cancelar-item" @click="simularTecla('F3')">Cancelar Item (F3)</button>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-pdv fechar-caixa" @click="simularTecla('F12')">Fechar Caixa (F12)</button>
+                            </div>
                         </div>
                     </div>
-                    <div class="row bold mt-5 mb-5" style="height: 15vh">
-                        <div class="col-md-12" v-if="product.description">
-                            Último produto:
-                        </div>
-                        <div class="col-md-9" style="font-size: 30px; font-style: italic" v-if="product.description">
-                            {{ product.description }}
-                        </div>
-                        <div class="col-md-3" style="text-align:right; font-size: 30px; font-style: italic" v-if="product.description">
-                            R${{ formatMoney(Number(product.output_value)) }}
-                        </div>
-                    </div>
-                    <div class="row p-1 justify-content-center">
-                        <div class="col-md-3 mr-1 box-total">
-                            <span style="font-size: 20px">Total</span><br>
-                            <span class="bold font_blue">{{ formatMoney(sale.total) }}</span>
-                        </div>
-                        <div class="col-md-3 mr-1 box-total">
-                            <span style="font-size: 20px">Total à Pagar (-)</span><br>
-                            <span class="bold font_red">{{ formatMoney(sale.total_to_pay) }}</span>
-                        </div>
-                        <div class="col-md-3 mr-1 box-total">
-                            <span style="font-size: 20px">Total Pago (+)</span><br>
-                            <span class="bold font_green">{{ formatMoney(sale.total_paid) }}</span>
-                        </div>
-                    </div>
-                    <div class="row p-1 justify-content-center">
-                        <div class="col-md-3">
-                            <button class="btn btn-pdv finalizar" @click="simularTecla('F4')">Finalizar Venda (F4)</button>
-                        </div>
-                        <div class="col-md-3">
-                            <button class="btn btn-pdv cancelar" @click="simularTecla('F5')">Cancelar Venda (F5)</button>
-                        </div>
-                        <div class="col-md-3">
-                            <button class="btn btn-pdv cancelar-item" @click="simularTecla('F3')">Cancelar Item (F3)</button>
-                        </div>
-                    </div>
-                </div>
+                </div>    
             </div>    
-        </div>    
-        <div class="col-md-5">
-            <div class="card">
-                <div class="card-body mh">
-                    <div class="row bold">
-                        <div class="col-md-12">
-                            <div class="row item" style="margin-top: -5px">
-                                <div class="col-md-1">
-                                    #
+            <div class="col-md-5">
+                <div class="card">
+                    <div class="card-body mh">
+                        <div class="row bold">
+                            <div class="col-md-12">
+                                <div class="row item" style="margin-top: -5px">
+                                    <div class="col-md-1">
+                                        #
+                                    </div>
+                                    <div class="col-md-7">
+                                        Descrição
+                                    </div>                             
+                                    <div class="col-md-2">
+                                        Vl. Unit
+                                    </div>                            
+                                    <div class="col-md-2">
+                                        Total
+                                    </div>
                                 </div>
-                                <div class="col-md-7">
-                                    Descrição
-                                </div>                             
-                                <div class="col-md-2">
-                                    Vl. Unit
-                                </div>                            
-                                <div class="col-md-2">
-                                    Total
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 list-products" id="scrollDiv">
+                                <div class="row item" v-for="(item, index) in sale.itens" :key="index">
+                                    <div class="col-md-1">
+                                        {{ index + 1 }}
+                                    </div>
+                                    <div class="col-md-7">
+                                        {{ item.quantity }} x {{ item.product.product_stripped }}
+                                    </div>                            
+                                    <div class="col-md-2">
+                                        {{ formatMoney(item.unit_value) }}
+                                    </div>                            
+                                    <div class="col-md-2">
+                                        {{ formatMoney(item.total) }}
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-12 list-products" id="scrollDiv">
-                            <div class="row item" v-for="(item, index) in sale.itens" :key="index">
-                                <div class="col-md-1">
-                                    {{ index + 1 }}
-                                </div>
-                                <div class="col-md-7">
-                                    {{ item.quantity }} x {{ item.product.product_stripped }}
-                                </div>                            
-                                <div class="col-md-2">
-                                    {{ formatMoney(item.unit_value) }}
-                                </div>                            
-                                <div class="col-md-2">
-                                    {{ formatMoney(item.total) }}
-                                </div>
+                </div>    
+            </div>    
+        </div>   
+    </section>
+    <section v-else>
+
+        <div class="row justify-content-center">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 centered bold fs-26">
+                                <i class="fas fa-times" style="color: red"></i> Caixa Fechado
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>    
-        </div>    
-    </div>   
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row justify-content-center">
+                            <div class="col-md-12 centered">
+                                Para abrir o caixa, forneça as informações a seguir
+                            </div>
+                            <div class="col-md-2 mt-5 mb-2 centered">
+                                <label>Valor de Abertura</label>
+                                <money class="form-control" v-model="new_cashier.open_value" v-bind="money"></money>
+                            </div>
+                        </div>
+                        <div class="row justify-content-center mb-5">
+                            <div class="col-md-2 centered">
+                                <button class="btn btn-primary" @click="openCashier">
+                                    Abrir Caixa
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
     <!-- Modal de Itens -->
     <div class="modal fade" id="modalItens" tabindex="-1" role="dialog" aria-labelledby="modalItensTitle" aria-hidden="true" @keydown="handleKey" >
         <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
@@ -211,6 +254,11 @@ import vSelect from "vue-select";
 export default {
   data() {
     return {
+        opened: false,
+        new_cashier: {
+            open_value: 0
+        },
+        cashier: {},
         items: [],
         selectedIndex: 0, // Índice da opção selecionada
         showModalItens: false,
@@ -245,6 +293,29 @@ export default {
   },
   computed: {},
   methods: {
+    openCashier(){
+        const self = this;
+        let api = self.$store.state.api + "cashier/new";
+
+        self.$loading(true);
+
+        axios
+        .post(api, self.new_cashier)
+        .then((response) => {
+            self.$message(
+                "Sucesso",
+                `Caixa aberto`,
+                "success"
+            );
+            self.$loading(false);
+
+            self.getCashier();
+        })
+        .catch((error) => {
+            self.$loading(false);
+            self.$message(null, error.response.data, "error");
+        });
+    },
     resetCashier(){
         const self = this;
         
@@ -314,6 +385,7 @@ export default {
         self.$loading(true);
 
         self.sale.send_nf = id; 
+        self.sale.cashier_id = self.cashier.id; 
         
         $('#modalSaveSale').modal('hide');
 
@@ -510,6 +582,52 @@ export default {
                 case 'F7':                    
                     self.save(2);
                     break;
+                case 'F12':             
+                    swal({
+                        title: "Deseja fechar o caixa?",
+                        text: "Essa operação não pode ser desfeita",
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#DD6B55",
+                        confirmButtonText: "Sim, fechar!",
+                        showLoaderOnConfirm: true,
+                        buttons: {
+                        catch: {
+                            text: "Não",
+                            value: "cancel",
+                            className: "btn-danger",
+                        },
+                        confirm: {
+                            text: "Sim",
+                            value: "confirm",
+                        },
+                        },
+                    }).then((value) => {
+                        switch (value) {
+                        case "cancel":
+                            swal("Cancelado", "O caixa não foi fechado!", "info");
+                            break;
+
+                        case "confirm":
+                            let api = self.$store.state.api + "cashier/close";
+
+                            self.$loading(true);
+
+                            axios
+                                .post(api, self.cashier)
+                                .then((response) => {
+                                    self.getCashier();
+                                    self.$loading(false);
+                                    swal("Ok!", 'Caixa fechado com sucesso!', "success");
+                                })
+                                .catch((error) => {                                    
+                                    swal("Ops!", 'Houve um erro ao fechar o caixa, tente novamente.', "error");
+                                    self.$loading(false);
+                                });
+                            break;
+                        }
+                    });
+                    break;
             
                 default:
                     break;
@@ -550,12 +668,34 @@ export default {
 
         // Dispara o evento no elemento desejado
         document.dispatchEvent(eventoTeclado);
-    }
+    },
+    getCashier(){
+        const self = this;
+        let api = self.$store.state.api + "cashier/get";
+
+        self.$loading(true);
+
+        axios
+            .get(api)
+            .then((response) => {
+                if(response.data){
+                    self.cashier = response.data;
+                    self.opened = 1;
+                    self.inputFocus();
+                } else {
+                    self.opened = 0;
+                }
+                self.$loading(false);
+            })
+            .catch((error) => {
+                self.$loading(false);
+            });
+    },
   },
   mounted: function () {
     const self = this;
 
-    self.inputFocus();
+    self.getCashier();
 
     window.addEventListener("keydown", this.detectarTeclaF);
   },
@@ -616,6 +756,10 @@ export default {
 }
 .btn-pdv.cancelar-item{
     background-color: #e0b938;
+    color: #000;
+}
+.btn-pdv.fechar-caixa{
+    background-color: #b9b39c;
     color: #000;
 }
 

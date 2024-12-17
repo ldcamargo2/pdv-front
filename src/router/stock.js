@@ -11,11 +11,11 @@ let routes = {
             name: 'stock',
             component: Crud,
             meta: {
-                pageTitle: 'Movimentar Estoque',
+                pageTitle: 'Inventário',
                 access_nivel: ['1', '2'],
                 breadcrumb: [
                     {
-                        text: 'Estoque',
+                        text: 'Inventário',
                         active: true,
                     },
                 ],

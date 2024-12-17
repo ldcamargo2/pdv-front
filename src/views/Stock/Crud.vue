@@ -1,20 +1,43 @@
 <template>
   <div>    
     <div class="row justify-content-center">
-      <div class="col-md-3 button-operation input" :class="movement.operation == 1 ? 'input-active' : ''" @click="movement.operation = 1, focus()">Entrada</div>
-      <div class="col-md-3 button-operation output" :class="movement.operation == 2 ? 'output-active' : ''" @click="movement.operation = 2, focus()">Saída</div>
+      <div class="col-md-3 button-operation input" :class="movement.operation == 3 ? 'input-active' : ''" @click="movement.operation = 3, focus()">Inventário</div>
     </div>
 
     <div class="row justify-content-center mt-2">
       <div class="col-md-4">
         <label>Código de Barras</label>
-        <input type="text" id="product_code" class="form-control" @keyup.enter="move" v-model="movement.product_code" :disabled="movement.operation == 0">
+        <input type="text" id="product_code" class="form-control" @keyup.enter="setQuantity" v-model="movement.product_code" :disabled="movement.operation == 0">
       </div>
       <div class="col-md-2" style="margin-top: 27px">
-        <button class="btn btn-back" @click="move">Movimentar</button>
+        <button class="btn btn-back" @click="setQuantity">Movimentar</button>
       </div>
     </div>
-    
+    <!-- Modal -->
+    <div class="modal fade" id="modalQuantity" tabindex="-1" role="dialog" aria-labelledby="modalQuantityLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalQuantityLabel">Alterar Estoque do Produto</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-md-12">
+                <label>Informe a nova quantidade que deseja movimentar:</label>
+                <input type="number" id="quantidade" class="form-control" v-model="movement.quantity" @keyup.enter="move">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" @click="move" :disabled="!movement.quantity">Salvar Alterações</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -24,8 +47,9 @@ export default {
   data: function () {
     return {
       movement: {
-        operation: 0,
-        product_code: ''
+        operation: 3,
+        product_code: '',
+        quantity: ''
       }
     };
   },
@@ -36,23 +60,33 @@ export default {
             document.getElementById("product_code").focus();
       }, 400);
     },
+    setQuantity(){        
+        $('#modalQuantity').modal('show');
+        setTimeout(() => {
+            document.getElementById("quantidade").focus();
+        }, 700);
+    },
     move(){
       const self = this;
-      const api = self.$store.state.api + "product/stock-movement";
+      const api = self.$store.state.api + "product/inventary";
 
       axios
         .post(api, self.movement)
         .then((response) => {
           self.$message('Sucesso', 'Movimentação inserida', "success");
+          $('#modalQuantity').modal('hide');
           self.movement = {
-            product_code: ''
+            product_code: '',
+            operation: 3
           }
           self.focus();
         })
         .catch((error) => {
           self.$message(null, error.response.data, "error");
+          $('#modalQuantity').modal('hide');
           self.movement = {
-            product_code: ''
+            product_code: '',
+            operation: 3
           }
           self.focus();
         });
