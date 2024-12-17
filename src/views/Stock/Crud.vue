@@ -54,6 +54,10 @@ export default {
     };
   },
   components: {  },
+  mounted: function () {
+    const self = this;
+    self.focus();
+  },
   methods: {
     focus(){
       setTimeout(() => {
