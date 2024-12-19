@@ -378,6 +378,20 @@ export default {
         
         $('#modalItens').modal('hide');
     },
+    print(obj){
+        axios
+            .post('http://localhost:5000/imprimir', obj, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+            .then((response) => {
+                console.log('response impressao', response)
+            })
+            .catch((error) => {
+                console.log('error impressao', error)
+            });
+    },
     save(id){
         const self = this;
         let api = self.$store.state.api + "sale/save";
@@ -400,6 +414,10 @@ export default {
                 self.$loading(false);
 
                 self.resetCashier();
+
+                console.log('return', response.data);
+
+                self.print(response.data);
             })
             .catch((error) => {
                 self.$loading(false);
