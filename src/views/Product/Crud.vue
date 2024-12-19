@@ -51,6 +51,7 @@ export default {
       columns: ["id", "description", "type", "supplier_id", 'company_id', 'stock', "actions"],
       tableData: ["id", "description", "type", "supplier_id", 'company_id', 'stock'],
       options: {
+        saveState: true,
         filterByColumn: true,
         debounce: 1000,
         filterable: ["id", "code", "description", "type", "supplier_id", "dimension", 'company_id'],

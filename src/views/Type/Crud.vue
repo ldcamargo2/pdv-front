@@ -36,6 +36,7 @@ export default {
       columns: ["id", "title", "actions"],
       tableData: ["id", "title"],
       options: {
+        saveState: true,
         filterByColumn: true,
         debounce: 1000,
         filterable: ["id", "title"],

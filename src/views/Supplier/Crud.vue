@@ -25,6 +25,7 @@ export default {
       columns: ["id", "fantasy_name", "company_name", "cnpj", "actions"],
       tableData: ["id", "fantasy_name", "company_name", "cnpj"],
       options: {
+        saveState: true,
         filterByColumn: true,
         debounce: 1000,
         filterable: ["id", "fantasy_name", "company_name", "cnpj"],

@@ -37,6 +37,7 @@ export default {
       columns: ["id", "photo", "name", "access_nivel", "email", "actions"],
       tableData: ["id", "photo", "name", "access_nivel", "email"],
       options: {
+        saveState: true,
         filterByColumn: true,
         debounce: 1000,
         filterable: ["name", "access_nivel", "email"],
