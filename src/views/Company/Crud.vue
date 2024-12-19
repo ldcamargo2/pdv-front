@@ -2,7 +2,7 @@
   <div>
     <div class="row">
       <div class="col-md-12">
-        <base-crud :ref="'productsCrud'" crudName="Empresas" newText="Nova Empresa" :table="table" :columns="columns"
+        <base-crud :ref="'companiesCrud'" crudName="Empresas" newText="Nova Empresa" :table="table" :columns="columns"
           :options="options" :endPoint="endPoint" :enableAdd="true" :enableEdit="true" :enableDelete="true"
           :enableView="false" :enableReset="false" :dataForm="dataForm">
         </base-crud>
@@ -19,7 +19,7 @@ export default {
     return {
       table: "productsTable",
       showMessageImport: false,
-      productsCrud: {},
+      companiesCrud: {},
       pages: [],
       url: "",
       columns: ["id", "fantasy_name", "company_name", "cnpj", "actions"],
