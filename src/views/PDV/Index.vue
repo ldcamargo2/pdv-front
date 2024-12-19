@@ -7,10 +7,10 @@
                     <div class="card-body mh">
                         <div class="row">
                             <div class="col-md-10">
-                                <input type="text" style="min-height: 65px; font-size: 25px; text-align: center" id="inputProduct" @keyup.enter="getProduct"  v-model="temp.product" placeholder="Código ou descrição do produto" class="form-control" autocomplete="new-password">
+                                <input type="text" style="min-height: 65px; font-size: 25px; text-align: center" id="inputProduct" @keyup.enter="getProduct" v-model="temp.product" placeholder="Código ou descrição do produto" class="form-control" autocomplete="new-password">
                             </div>
                             <div class="col-md-2">
-                                <input type="text" style="min-height: 65px; font-size: 25px; text-align: center" id="inputQtd" @keyup.enter="setQuantity"  v-model="temp.quantity" class="form-control">
+                                <input type="text" style="min-height: 65px; font-size: 25px; text-align: center" id="inputQtd" @keyup.enter="setQuantity" autocomplete="new-password" @blur="onBlurQuantity" v-model="temp.quantity" class="form-control">
                             </div>
                         </div>
                         <div class="row bold mt-5 mb-5" style="height: 15vh">
@@ -167,7 +167,7 @@
     </div>
     <!-- Modal de Pagamento -->
     <div class="modal fade" id="modalPayment" tabindex="-1" role="dialog" aria-labelledby="modalPaymentTitle" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
             <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modalPaymentLongTitle">Inserir pagamento</h5>
@@ -176,16 +176,17 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div class="row">
-                    <div class="col-md-12">
+                <div class="row justify-content-center mt-1">
+                    <div class="col-md-4">
                         <money class="form-control" id="inputMoney" v-model="setPayment.value" v-bind="money" @keyup.enter.native="savePayment" ></money>
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-3 btn-payment" :class="setPayment.method == 'C' ? 'active' : ''" @click="setPayment.method = 'C'">Crédito (C)</div>
-                    <div class="col-md-3 btn-payment" :class="setPayment.method == 'D' ? 'active' : ''" @click="setPayment.method = 'D'">Débito (D)</div>
-                    <div class="col-md-3 btn-payment" :class="setPayment.method == 'M' ? 'active' : ''" @click="setPayment.method = 'M'">Dinheiro (M)</div>
-                    <div class="col-md-3 btn-payment" :class="setPayment.method == 'P' ? 'active' : ''" @click="setPayment.method = 'P'">Pix (P)</div>
+                    <div class="col-md btn-payment" :class="setPayment.method == 'C' ? 'active' : ''" @click="setPayment.method = 'C'">Crédito <br>(C)</div>
+                    <div class="col-md btn-payment" :class="setPayment.method == 'D' ? 'active' : ''" @click="setPayment.method = 'D'">Débito <br>(D)</div>
+                    <div class="col-md btn-payment" :class="setPayment.method == 'M' ? 'active' : ''" @click="setPayment.method = 'M'">Dinheiro <br>(M)</div>
+                    <div class="col-md btn-payment" :class="setPayment.method == 'P' ? 'active' : ''" @click="setPayment.method = 'P'">Pix <br>(P)</div>
+                    <div class="col-md btn-payment" :class="setPayment.method == 'V' ? 'active' : ''" @click="setPayment.method = 'V'">Convênio <br>(V)</div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -233,7 +234,23 @@
             </div>
             <div class="modal-body">
                 <div class="row">
-                    <div class="col-md-12">
+                    <div class="col-md-12" v-if="sale.agreement">
+                        <div class="alert alert-danger p-1" role="alert">
+                            <strong>Venda via Convênio</strong><br>
+                            É obrigatório selecionar um conveniado.
+                        </div>
+                    </div>
+                    <div class="col-md-12" v-if="sale.agreement">
+                      <v-select
+                        :label="'name'"
+                        :options="customers"
+                        :reduce="(customers) => customers.id"
+                        v-model="sale.client_id"
+                        class="vselect"
+                        ref="focusConvenio"
+                      />
+                    </div>
+                    <div class="col-md-12" v-if="!sale.agreement">
                         <label>Informar CPF</label>
                         <input class="form-control" id="inputCPF" v-mask="'###.###.###-##'" v-model="sale.cpf" @keyup.enter="save(1)" />
                     </div>
@@ -260,6 +277,7 @@ export default {
         },
         cashier: {},
         items: [],
+        customers: [],
         selectedIndex: 0, // Índice da opção selecionada
         showModalItens: false,
         cancelItem: null,
@@ -293,6 +311,10 @@ export default {
   },
   computed: {},
   methods: {
+    onBlurQuantity(){
+        const self = this;
+        self.temp.quantity = self.temp.quantity.replace(/,/g, ".");
+    },
     openCashier(){
         const self = this;
         let api = self.$store.state.api + "cashier/new";
@@ -396,6 +418,13 @@ export default {
         const self = this;
         let api = self.$store.state.api + "sale/save";
 
+        if(self.sale.agreement){
+            if(!self.sale.client_id){
+                self.$message('Erro', 'É obrigatório selecionar um conveniado para finalizar a venda.', "error");
+                return;
+            }
+        }
+
         self.$loading(true);
 
         self.sale.send_nf = id; 
@@ -469,13 +498,27 @@ export default {
 
         self.sale.total_paid = self.sale.total_paid + self.setPayment.value;
         self.sale.total_to_pay = self.sale.total_to_pay - self.setPayment.value;
+
+        if(self.setPayment.method == 'V'){
+            self.sale.agreement = true;
+
+            setTimeout(() => {
+                self.$refs.focusConvenio.$el.querySelector('input').focus();
+
+                self.getCustomers();
+            }, 1500); 
+
+            
+        } else {
+            self.sale.agreement = false;
+        }
         
         self.setPayment = {
             method: 0,
             value: 0
         }
 
-        if(self.sale.total_to_pay == 0){
+        if(self.sale.total_to_pay <= 0){
             $('#modalSaveSale').modal('show');
 
             self.finishing = 1;
@@ -667,6 +710,10 @@ export default {
         if ((event.key.startsWith("M") || event.key.startsWith("m")) && !isNaN(event.key.slice(1))) {
             self.setPayment.method = 'M';
         }
+        
+        if ((event.key.startsWith("V") || event.key.startsWith("v")) && !isNaN(event.key.slice(1))) {
+            self.setPayment.method = 'V';
+        }
     },
     scrollToBottom() {
         setTimeout(() => {
@@ -687,6 +734,18 @@ export default {
         // Dispara o evento no elemento desejado
         document.dispatchEvent(eventoTeclado);
     },
+    getCustomers(){
+        const self = this;
+        let api = self.$store.state.api + "customers";
+
+        axios
+            .get(api)
+            .then((response) => {                
+                self.customers = response.data.data;
+            })
+            .catch((error) => {
+            });
+    },
     getCashier(){
         const self = this;
         let api = self.$store.state.api + "cashier/get";
@@ -699,7 +758,9 @@ export default {
                 if(response.data){
                     self.cashier = response.data;
                     self.opened = 1;
-                    self.inputFocus();
+                    setTimeout(() => {
+                        self.inputFocus();
+                    }, 500);
                 } else {
                     self.opened = 0;
                 }

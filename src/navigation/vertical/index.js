@@ -21,6 +21,11 @@ export default [
         access_nivel: [1],
       },
       {
+        title: 'Clientes',
+        route: 'list-customers',
+        access_nivel: [1],
+      },
+      {
         title: 'Fornecedores',
         route: 'list-suppliers',
         access_nivel: [1],

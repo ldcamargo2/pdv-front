@@ -14,6 +14,7 @@ import PDV from "./pdv";
 import BillsToPay from './bills_to_pay'
 import BillsToReceive from './bills_to_receive'
 import FinancialCategory from './financial_category'
+import Customer from './customers'
 
 Vue.use(VueRouter);
 
@@ -26,6 +27,7 @@ const router = new VueRouter({
   routes: [
     BillsToPay,
     BillsToReceive,
+    Customer,
     FinancialCategory,
     User,
     Profile,
