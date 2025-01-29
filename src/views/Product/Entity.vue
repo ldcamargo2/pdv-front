@@ -28,6 +28,7 @@
                       <v-select
                         :label="'company_name'"
                         v-model="product.codes"
+                        @input="verifyCode"
                         class="vselect"
                         taggable
                         multiple
@@ -181,6 +182,16 @@
                       />
                     </div>                                  
                   </div>
+                  <div class="row mb-5">
+                    <div class="col-md-2 mt-2" v-if="product.stock">
+                      <toggle-button class="mr-2" v-model="product.inventariado" />
+                      <label for="inputValue">Inventariado?</label>
+                    </div>
+                    <div class="col-md-4" v-if="product.inventariado">
+                      <label>Data de inventário</label>
+                      <input type="datetime-local" class="form-control" v-model="product.data_inventario">
+                    </div>
+                  </div>
 
                   <span class="required_fields">
                     <span class="required">*</span>
@@ -231,6 +242,22 @@ export default {
   },
   computed: {},
   methods: {
+    verifyCode(obj){
+      const self = this;
+      const api = self.$store.state.api + "product-codes/verify";
+
+      var index = (obj.length - 1);
+
+      axios
+        .post(api, [obj[index]])
+        .then((response) => {
+         
+        })
+        .catch((error) => {
+          self.$message(null, error.response.data, "error");
+          self.product.codes.splice(index,1);
+        });
+    },
     save: function () {
       const self = this;
       let api = self.$store.state.api + "products";
@@ -240,6 +267,8 @@ export default {
 
         self.product._method = "PUT";
       }
+
+      self.product.inventariado = self.product.inventariado ? 1 : 0;
 
       axios
         .post(api, self.product)
@@ -270,6 +299,8 @@ export default {
           });
 
           self.product.codes = codes;
+          
+          self.product.inventariado = self.product.inventariado == 1 ? true : false;
         })
         .catch((error) => {
           self.$message(null, error.response.data, "error");

@@ -147,7 +147,7 @@
                     <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">    
+                <div class="modal-body fs-20">    
                     <ul>
                         <li 
                             v-for="(item, index) in items" 
@@ -155,7 +155,10 @@
                             :class="{ selected: index === selectedIndex }"
                             @click="selectItem(index)"
                         >
-                            {{ item.description }}
+                            <div class="row">
+                                <div class="col-md-10">{{ item.description }}</div>
+                                <div class="col-md-2">R${{ formatMoney(Number(item.output_value)) }}</div>
+                            </div>                            
                         </li>
                     </ul>
                 </div>
@@ -305,7 +308,8 @@ export default {
             total_paid: 0
         },
         temp: {
-            quantity: 1
+            quantity: 1,
+            balanca: false
         }
     };
   },
@@ -359,7 +363,8 @@ export default {
         },
  
         self.temp = {
-            quantity: 1
+            quantity: 1,
+            balanca: false
         }
 
         self.inputFocus();
@@ -391,7 +396,7 @@ export default {
         self.sale.total = self.sale.total + obj.total;
         self.sale.total_to_pay = self.sale.total_to_pay + obj.total;
 
-        self.temp =  { quantity: 1 }
+        self.temp =  { quantity: 1, balanca: false }
 
         setTimeout(() => {
             self.inputFocus();
@@ -409,6 +414,54 @@ export default {
                 })
             .then((response) => {
                 console.log('response impressao', response)
+            })
+            .catch((error) => {
+                console.log('error impressao', error)
+            });
+    },
+    sendReturnSEFAZ(obj, sale){
+        const self = this;
+        let api = self.$store.state.api + "sale/receive-sefaz";
+        
+        self.$loading(true);
+
+        obj.sale = sale;
+
+        axios
+            .post(api, obj)
+            .then((response) => {
+                self.$message(
+                    "Sucesso",
+                    `NF autenticado na SEFAZ!`,
+                    "success"
+                );
+
+                self.$loading(false);
+                
+                self.print(response.data.json);
+                
+            })
+            .catch((error) => {
+                self.$loading(false);
+                self.$message(null, error.response.data, "error");
+            });
+    },
+    authSEFAZ(obj, sessao, sale){
+        const self = this;
+
+        obj = {
+            'xml_venda': obj,
+            'numero_sessao': sessao
+        };
+
+        axios
+            .post('http://localhost:5000/envia-nf', obj, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+            .then((response) => {
+                self.sendReturnSEFAZ(response.data, sale);
             })
             .catch((error) => {
                 console.log('error impressao', error)
@@ -444,9 +497,13 @@ export default {
 
                 self.resetCashier();
 
-                console.log('return', response.data);
-
-                self.print(response.data);
+                if(response.data.tipo_processamento == 'CNF'){
+                    //Imprime direto, cupom não fiscal
+                    self.print(response.data.json);
+                } else {
+                    self.authSEFAZ(response.data.xml, response.data.numero_sessao, response.data.sale);
+                    self.$message('Sucesso', 'Enviando para SEFAZ', "success");
+                }
             })
             .catch((error) => {
                 self.$loading(false);
@@ -544,6 +601,10 @@ export default {
       const self = this;
       const api = self.$store.state.api + "product/get-product";
 
+      if(self.temp.product.length == 13 && self.temp.product.startsWith("2")){
+        self.temp.balanca = true;
+      }
+
       axios
         .post(api, self.temp)
         .then((response) => {
@@ -560,7 +621,7 @@ export default {
             self.product = response.data;
 
             if(!self.product){
-                self.temp =  { quantity: 1 }
+                self.temp =  { quantity: 1, balanca: false }
                 swal("Ops!", 'Produto não cadastrado.', "error")
                 .then(() => {
                     setTimeout(() => {
@@ -569,6 +630,10 @@ export default {
                 });
 
                 return;
+            }
+
+            if(self.product.balanca){
+                self.temp.quantity = self.product.balanca.quantity;
             }
 
             var obj = {
@@ -584,12 +649,12 @@ export default {
             self.sale.total = self.sale.total + obj.total;
             self.sale.total_to_pay = self.sale.total_to_pay + obj.total;
 
-            self.temp =  { quantity: 1 }
+            self.temp =  { quantity: 1, balanca: false }
             self.inputFocus();
             self.scrollToBottom();
         })
         .catch((error) => {
-            self.temp =  { quantity: 1 }
+            self.temp =  { quantity: 1, balanca: false }
             swal("Ops!", error.response.data, "error")
             .then(() => {
                 setTimeout(() => {

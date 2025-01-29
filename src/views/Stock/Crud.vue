@@ -15,7 +15,7 @@
     </div>
     <!-- Modal -->
     <div class="modal fade" id="modalQuantity" tabindex="-1" role="dialog" aria-labelledby="modalQuantityLabel" aria-hidden="true">
-      <div class="modal-dialog" role="document">
+      <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="modalQuantityLabel">Alterar Estoque do Produto</h5>
@@ -25,6 +25,12 @@
           </div>
           <div class="modal-body">
             <div class="row">
+              <div class="col-md-10 fs-18 bold mb-3 mt-2">
+                {{ product.description }}
+              </div>
+              <div class="col-md-2 fs-18 bold mb-3 mt-2">
+                R${{ product.output_value }}
+              </div>
               <div class="col-md-12">
                 <label>Informe a nova quantidade que deseja movimentar:</label>
                 <input type="number" id="quantidade" class="form-control" v-model="movement.quantity" @keyup.enter="move">
@@ -50,7 +56,8 @@ export default {
         operation: 3,
         product_code: '',
         quantity: ''
-      }
+      },
+      product: {},
     };
   },
   components: {  },
@@ -64,11 +71,23 @@ export default {
             document.getElementById("product_code").focus();
       }, 400);
     },
-    setQuantity(){        
-        $('#modalQuantity').modal('show');
-        setTimeout(() => {
-            document.getElementById("quantidade").focus();
-        }, 700);
+    setQuantity(){ 
+      const self = this;
+      const api = self.$store.state.api + "product/get-by-code";
+
+      axios
+        .post(api, self.movement)
+        .then((response) => {      
+          self.product = response.data;
+          $('#modalQuantity').modal('show');
+          setTimeout(() => {
+              document.getElementById("quantidade").focus();
+          }, 700);
+        })
+        .catch((error) => {
+          self.$message('Erro', 'Produto não cadastrado', "error");
+          self.focus();
+        });
     },
     move(){
       const self = this;
