@@ -705,7 +705,8 @@ export default {
                 case 'F5':                    
                     window.location.reload();
                     break;
-                case 'F7':                    
+                case 'F7':         
+                    console.log('pegou F7');          
                     self.save(2);
                     break;
                 case 'F12':             
@@ -840,8 +841,14 @@ export default {
     const self = this;
 
     self.getCashier();
+    
+    window.removeEventListener("keydown", this.detectarTeclaF);
+    console.log('Detecção de teclas removida')
 
-    window.addEventListener("keydown", this.detectarTeclaF);
+    setTimeout(() => {
+        window.addEventListener("keydown", self.detectarTeclaF);
+        console.log('listener adicionado');
+    }, 1500);
   },
   beforeUnmount() {
     // Remove o evento ao destruir o componente
