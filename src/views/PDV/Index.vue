@@ -527,6 +527,8 @@ export default {
     },
     savePayment(){
         const self = this;
+
+        console.log('salvando pagamento');
         
         $('#modalPayment').modal('hide');
 
@@ -575,7 +577,12 @@ export default {
             value: 0
         }
 
-        if(self.sale.total_to_pay <= 0){
+        console.log('chegou aqui');
+
+        if(self.sale.total_to_pay <= 0.9){
+            
+            console.log('Pagamento é menor');
+
             $('#modalSaveSale').modal('show');
 
             self.finishing = 1;
@@ -584,6 +591,8 @@ export default {
                 const input = document.getElementById('inputCPF');
                 input.focus();  
             }, 500);          
+        } else {
+            console.log('não é menor', self.sale.total_to_pay);
         }
         
         self.inputFocus();
@@ -684,6 +693,8 @@ export default {
                     break;
                 case 'F4':                    
                     $('#modalPayment').modal('show')
+
+                    console.log('modal de pagamento');
 
                     setTimeout(() => {
                         const input2 = document.getElementById('inputMoney');
